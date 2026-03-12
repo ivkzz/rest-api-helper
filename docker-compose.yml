@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-directory_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  app:
+    build: .
+    restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-directory_db}
+      API_KEY: ${API_KEY:-secret-api-key}
+      PYTHONPATH: /app
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
